@@ -2,11 +2,32 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 )
 
 func main() {
-	fmt.Println(Validate("4417123456789113"))
+	args := os.Args
+
+	flags := make(map[string]func(string))
+
+	flags["validate"] = func(value string) {
+		if Validate(value) == false {
+			fmt.Println("INCORRECT")
+		} else {
+			fmt.Println("OK")
+		}
+	}
+	// Обработка аргументов
+	for i := 1; i < len(args); i++ {
+		if args[i] == "validate" && i+1 < len(args) {
+			// Проверяем все аргументы после ключа "validate"
+			for j := i + 1; j < len(args); j++ {
+				flags["validate"](args[j]) // Проверяем каждый номер карты
+			}
+			return // Завершаем выполнение программы после обработки всех карт
+		}
+	}
 }
 
 func Validate(numberCard string) bool {
@@ -21,7 +42,6 @@ func Validate(numberCard string) bool {
 		// Преобразуем символ в цифру
 		digit, err := strconv.Atoi(string(char))
 		if err != nil {
-			fmt.Println("Ошибка при преобразовании символа:", err)
 			return validCard
 		}
 		digits = append(digits, digit)
