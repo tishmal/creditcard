@@ -2,92 +2,26 @@ package main
 
 import (
 	"bufio"
+	"creditcard/logic"
 	"fmt"
-	"math/rand"
 	"os"
-	"strconv"
 	"strings"
-	"time"
 )
 
 func main() {
 	args := os.Args
+	isPick := os.Args[2] == "--pick"
 
 	flags := make(map[string]func(string))
 
-	var countStar int
-	var lastValueThisStar bool
 	flags["generate"] = func(value string) { // value - это значение(номер кредитной карты или нет) которое мы получаем из консоли
-		for _, ch := range value {
-			if ch == '*' {
-				countStar++
-			}
-			if len(value)-countStar >= 0 && len(value)-countStar < len(value) { // чтобы индекс не вышел из диапазона надо проверить, чтобы он был меньше длины входящей строки value
-				if value[len(value)-countStar] == '*' {
-					lastValueThisStar = true
-				} else {
-					lastValueThisStar = false
-				}
-			}
-			if countStar > 4 {
-				os.Exit(1)
-			}
-		}
-		if lastValueThisStar == false {
-			os.Exit(1)
-		}
-		if lastValueThisStar == true {
-			var digits []int
-			var validNumbers []string
-			for i, char := range value {
-				if i >= len(value)-countStar {
-					maxCombinations := 1
-					for i := 0; i < countStar; i++ {
-						maxCombinations *= 10
-					}
-
-					for i := 0; i < maxCombinations; i++ {
-						// Форматируем число с ведущими нулями
-						replacement := fmt.Sprintf("%0*d", countStar, i)
-						// Создаем текущий номер, заменяя звездочки на цифры
-						currentNumber := value[:len(value)-countStar] + replacement
-
-						if Validate(currentNumber) {
-							validNumbers = append(validNumbers, currentNumber)
-						}
-					}
-					if len(validNumbers) == 0 {
-						os.Exit(1)
-					}
-
-					// Генерируем случайное число от 0 до 9
-					randomNumber := randomInt(0, 10)
-
-					digits = append(digits, randomNumber)
-				} else {
-					// Преобразуем символ в цифру
-					digit, err := strconv.Atoi(string(char))
-					if err != nil {
-						return
-					}
-					digits = append(digits, digit)
-				}
-			}
-			var numCard string
-			for _, d := range digits {
-				numCard += strconv.Itoa(d)
-			}
-			// fmt.Println(numCard)
-			for _, num := range validNumbers {
-				fmt.Println(num)
-			}
-		}
+		logic.GenerateCards(value, isPick)
 	}
 
 	var hasError bool
 
 	flags["validate"] = func(value string) {
-		if Validate(value) == false {
+		if logic.Validate(value) == false {
 			fmt.Fprintf(os.Stderr, "INCORRECT\n")
 			hasError = true
 		} else {
@@ -143,62 +77,4 @@ func main() {
 	} else {
 		os.Exit(0)
 	}
-}
-
-func Validate(numberCard string) bool {
-	// Алгоритм Луны
-	// 1 этап:
-	// Создадим слайс для хранения цифр
-	var digits []int
-	var validCard bool
-
-	if len(numberCard) < 13 || len(numberCard) > 19 {
-		validCard = false
-	}
-
-	// Перебираем каждый символ строки, преобразуем его в число и добавляем в слайс
-	for _, char := range numberCard {
-		// Преобразуем символ в цифру
-		digit, err := strconv.Atoi(string(char))
-		if err != nil {
-			return validCard
-		}
-		digits = append(digits, digit)
-	}
-	// 2 этап (умножаем на 2,каждую вторую цифру начиная с первой):
-	var digitsMulti []int
-	for i, num := range digits {
-		if i%2 == 0 {
-			if num*2 > 9 { // 3 этап (если в результате удвоения получается две цифры, то сложите эти две цифры):
-				sum := (num*2)/10 + (num*2)%10 // num/10 извлекает десятки (например для 35 это будет 3); num%10 извлекает единицы (для 35 это 5)
-				digitsMulti = append(digitsMulti, sum)
-			} else {
-				digitsMulti = append(digitsMulti, num*2)
-			}
-		} else {
-			digitsMulti = append(digitsMulti, num)
-		}
-	}
-	// 4 этап (складываем все числа)
-	var sumGrand int // итоговая сумма
-	for _, num := range digitsMulti {
-		sumGrand += num
-	}
-
-	if sumGrand%10 == 0 { // Если итоговая сумма делится на 10, то кредитная карта действительна.
-		validCard = true
-	} else {
-		validCard = false
-	}
-	if numberCard == "" {
-		validCard = false
-	}
-
-	return validCard
-}
-
-func randomInt(min, max int) int {
-	//
-	rand.Seed(time.Now().UnixNano())
-	return rand.Intn(max-min) + min // Генерируем случайное число в диапазоне [min, max)
 }
