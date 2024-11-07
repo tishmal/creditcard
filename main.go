@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -82,9 +83,16 @@ func main() {
 		// Если флаг --stdin активирован, читаем номера карт с stdin
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
-			// Читаем строки с картами и передаем их в функцию валидации
-			cardNumber := scanner.Text()
-			flags["validate"](cardNumber)
+			// Читаем одну строку, содержащую все номера карт
+			inputLine := scanner.Text()
+
+			// Разбиваем строку на отдельные номера карт
+			cardNumbers := strings.Fields(inputLine)
+
+			// Обрабатываем каждый номер карты
+			for _, cardNumber := range cardNumbers {
+				flags["validate"](cardNumber) // Проверяем каждый номер карты
+			}
 		}
 		if err := scanner.Err(); err != nil {
 			fmt.Fprintf(os.Stderr, "INCORRECT\n")
