@@ -23,6 +23,25 @@ func main() {
 	var inf bool
 	isPick := args[2] == "--pick"
 
+	// Обработка флагов --brands и --issuers
+	for i := 1; i < len(args); i++ {
+		if args[i] == "--brands" || strings.HasPrefix(args[i], "--brands=") {
+			useBrands = true
+		}
+		if args[i] == "--issuers" || strings.HasPrefix(args[i], "--issuers=") {
+			useIssuers = true
+		}
+	}
+	for i := 1; i < len(args); i++ {
+		if args[i] == "information" {
+			inf = true
+		}
+	}
+
+	flags2["issue"] = func(brand string) func(issuer string) {
+		// обрабатываем параметры после обработки командной строки и обработки флагов текстовых документов
+	}
+
 	flags2["information"] = func(brandsFile string) func(cardNumber string) {
 		return func(cardNumber string) {
 			if logic.Information(brandsFile, cardNumber, useBrands, useIssuers, once) == false {
@@ -57,20 +76,6 @@ func main() {
 	for i := 1; i < len(args); i++ {
 		if args[i] == "--stdin" {
 			stdinInput = true
-		}
-	}
-	// Обработка флагов --brands и --issuers
-	for i := 1; i < len(args); i++ {
-		if args[i] == "--brands" || strings.HasPrefix(args[i], "--brands=") {
-			useBrands = true
-		}
-		if args[i] == "--issuers" || strings.HasPrefix(args[i], "--issuers=") {
-			useIssuers = true
-		}
-	}
-	for i := 1; i < len(args); i++ {
-		if args[i] == "information" {
-			inf = true
 		}
 	}
 
@@ -193,7 +198,7 @@ func main() {
 			hasError = true
 		}
 	} else {
-		// Обработка аргументов командной строки
+		// Обработка аргументов командной строки и вызов флага
 		for i := 1; i < len(args); i++ {
 			if args[i] == "validate" && i+1 < len(args) {
 				// Проверяем все аргументы после ключа "validate"
@@ -213,6 +218,24 @@ func main() {
 					flags["generate"](args[i+2])
 				}
 				return
+			}
+			// Обработка аргументов командной строки с использованием флага issue
+			if args[i] == "issue" && i+1 < len(args) {
+				for k := i + 1; k < len(args); k++ {
+					var brand string
+					var issuer string
+					if strings.HasPrefix(args[k], "--brand=") {
+						brand = strings.TrimPrefix(args[k], "--brand=")
+					} else {
+						brand = "not used"
+					}
+					if strings.HasPrefix(args[k], "--issuer=") {
+						issuer = strings.TrimPrefix(args[k], "--issuer=")
+					} else {
+						issuer = "not used"
+					}
+					flags2["issue"](brand)(issuer)
+				}
 			}
 		}
 	}
