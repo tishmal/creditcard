@@ -8,10 +8,6 @@ import (
 	"strings"
 )
 
-// // Функция флага information
-// func useBrandsAndOrIssuers(_cardNumber string, _numBrand string) bool {
-// }
-
 func main() {
 	args := os.Args
 
@@ -31,6 +27,8 @@ func main() {
 		return func(cardNumber string) {
 			if logic.Information(brandsFile, cardNumber, useBrands, useIssuers, once) == false {
 				once = false
+			} else {
+				once = true
 			}
 		}
 	}
@@ -75,6 +73,10 @@ func main() {
 			inf = true
 		}
 	}
+
+	// if logic.InfArgStdin(useIssuers, useBrands, once, stdinInput, inf) {
+	// 	once = true
+	// }
 	if stdinInput && inf {
 		// Если флаг --stdin активирован, читаем номера карт с stdin
 		scanner := bufio.NewScanner(os.Stdin)
@@ -82,7 +84,7 @@ func main() {
 			// Читаем строку с номерами карт
 			inputLine := scanner.Text()
 			if inputLine == "" {
-				fmt.Fprintf(os.Stderr, "INCORRECT\n")
+				fmt.Fprintf(os.Stderr, "input line not found\n")
 			}
 
 			// Разбиваем строку на отдельные номера карт
@@ -97,6 +99,7 @@ func main() {
 					fmt.Println("Card Issuer: -")
 					continue // Если карта некорректна, то прекращаем дальнейшую обработку для этой карты
 				}
+				once = true
 				for i := 1; i < len(args); i++ {
 					if args[i] == "information" {
 						// Перебираем флаги --brands и --issuers
@@ -127,8 +130,7 @@ func main() {
 			}
 		}
 		if err := scanner.Err(); err != nil {
-			fmt.Fprintf(os.Stderr, "INCORRECT\n")
-			hasError = true
+			os.Exit(1)
 		}
 	} else {
 		// Обработка аргументов командной строки

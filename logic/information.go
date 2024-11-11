@@ -22,6 +22,17 @@ func Information(brandsFile string, cardNumber string, useBrands bool, useIssuer
 		}
 		defer brandsFileContent.Close()
 
+		// Проверяем, пустой ли файл
+		stat, err := brandsFileContent.Stat()
+		if err != nil {
+			fmt.Println("information: could not get file stats")
+			os.Exit(1)
+		}
+		if stat.Size() == 0 {
+			fmt.Println("information: file is empty")
+			os.Exit(1)
+		}
+
 		// Чтение файла построчно
 		scanner := bufio.NewScanner(brandsFileContent)
 		if err := scanner.Err(); err != nil {
@@ -29,6 +40,9 @@ func Information(brandsFile string, cardNumber string, useBrands bool, useIssuer
 		}
 		for scanner.Scan() {
 			line := scanner.Text() // тут каждую строку текстового файла записываем в line. line это например VISA:4
+			if line == "" {
+				os.Exit(1)
+			}
 			// Разделяем строку на бренд и номер
 			for i, ch := range line { // перебираем строку line и если встретим в ней ':' то дробим строку
 				if ch == ':' {
