@@ -10,9 +10,16 @@ func Validate(numberCard string) bool {
 	// Создадим слайс для хранения цифр
 	var digits []int
 	var validCard bool
-
+	if numberCard == "" {
+		return false
+	}
 	if len(numberCard) < 13 || len(numberCard) > 19 {
-		validCard = false
+		return false
+	}
+	for _, i := range numberCard {
+		if i < '0' || i > '9' {
+			return false
+		}
 	}
 
 	// Перебираем каждый символ строки, преобразуем его в число и добавляем в слайс
