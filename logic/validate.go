@@ -50,11 +50,6 @@ func Validate(numberCard string) bool {
 	for _, num := range digitsMulti {
 		sumGrand += num
 	}
-	if sumGrand%10 == 0 { // Если итоговая сумма делится на 10, то кредитная карта действительна.
-		validCard = true
-	} else {
-		validCard = false
-	}
 
-	return validCard
+	return sumGrand%10 == 0 // Если итоговая сумма делится на 10, то кредитная карта действительна.
 }
