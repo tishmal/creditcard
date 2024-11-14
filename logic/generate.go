@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// функция для флага generate, генерирует случайные номера карт
 func GenerateCards(value string, isPick bool) {
 	var countStar int
 	var lastValueThisStar bool
