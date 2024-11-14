@@ -26,7 +26,7 @@ func Issue(brand string, issuer string, useBrands bool, useIssuers bool, brandsF
 		os.Exit(1)
 	}
 	// Если используется флаг --brands или --issuers, обрабатываем их
-	if useBrands || useIssuers { // код который ниже как оказалось подходит логически и практически для обработки данных с обоих текстовых файлов, поэтому чтобы не дублировать код, создадим метод и будем прогонять два вида данных
+	if useBrands && useIssuers { // код который ниже как оказалось подходит логически и практически для обработки данных с обоих текстовых файлов, поэтому чтобы не дублировать код, создадим метод и будем прогонять два вида данных
 		// brand - полиморфизм, может быть brand или issuers в зависимости от того какой файл пришёл в параметры флага information
 		// Читаем файл с брендами
 		brandsFileContent, err := os.Open(brandsFile)
@@ -85,8 +85,8 @@ func Issue(brand string, issuer string, useBrands bool, useIssuers bool, brandsF
 		if strings.HasPrefix(iin, bin) {
 			// Генерация номера карты
 			fmt.Println(GenerateCardNumber(iin, 16))
-		} else if useBrands && !useIssuers {
-			fmt.Println(GenerateCardNumber(bin, 16))
+		} else {
+			os.Exit(1)
 		}
 	} else {
 		os.Exit(1)

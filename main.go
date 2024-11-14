@@ -1,5 +1,7 @@
 package main
 
+// s1
+
 import (
 	"bufio"
 	"creditcard/logic"
@@ -81,6 +83,7 @@ func main() {
 	flags["validate"] = func(value string) {
 		if logic.Validate(value) == false {
 			fmt.Fprintf(os.Stderr, "INCORRECT\n")
+			os.Exit(1)
 			hasError = true
 		} else {
 			fmt.Fprintf(os.Stdout, "OK\n")
