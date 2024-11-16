@@ -36,11 +36,13 @@ func Information(emissioFile string, cardNumber string, useBrands bool, useIssue
 		// Чтение файла построчно
 		scanner := bufio.NewScanner(brandsFileContent)
 		if err := scanner.Err(); err != nil {
+			fmt.Println("Reading file with error")
 			os.Exit(1)
 		}
 		for scanner.Scan() {
 			line := scanner.Text() // тут каждую строку текстового файла записываем в line. line это например VISA:4
 			if line == "" {
+				fmt.Println("Reading file with error")
 				os.Exit(1)
 			}
 			// Разделяем строку на бренд и номер
@@ -71,9 +73,15 @@ func Information(emissioFile string, cardNumber string, useBrands bool, useIssue
 			once = false
 		}
 		if emissioFile == "brands.txt" {
+			if _nameBr == "" {
+				_nameBr = "-"
+			}
 			fmt.Println("Card Brand:", _nameBr)
 		}
 		if emissioFile == "issuers.txt" {
+			if _nameIssuers == "" {
+				_nameIssuers = "-"
+			}
 			fmt.Println("Card Issuer:", _nameIssuers)
 		}
 	} else {

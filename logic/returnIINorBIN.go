@@ -37,6 +37,7 @@ func ReturnIINorBIN(scanner *bufio.Scanner, emissio string, iin string) string {
 	// Второй проход по сохранённым строкам для основной логики
 	for _, line := range lines {
 		if line == "" {
+			fmt.Println("Reading file with error")
 			os.Exit(1)
 		}
 

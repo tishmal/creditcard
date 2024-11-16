@@ -11,8 +11,8 @@ import (
 
 func main() {
 	args := os.Args
-
 	if len(args) < 3 { // Если длина аргументов меньше 3, то завершаем программу
+		fmt.Println("Incorrect input. Arguments not recognized.")
 		os.Exit(1)
 	}
 	flags := make(map[string]func(string))
@@ -62,6 +62,7 @@ func main() {
 		return func(issuersFile string) func(cardNumber string) {
 			return func(cardNumber string) {
 				if logic.Validate(cardNumber) == false {
+					fmt.Println("number card invalid")
 					os.Exit(1)
 				}
 				infa := logic.Information(brandsFile, cardNumber, useBrands, useIssuers, once)
@@ -155,6 +156,7 @@ func main() {
 			}
 		}
 		if err := scanner.Err(); err != nil {
+			fmt.Println("Error scaner")
 			os.Exit(1)
 		}
 	} else {
@@ -208,6 +210,7 @@ func main() {
 	if stdinInput {
 		for i := 0; i < len(args); i++ {
 			if args[len(args)-1] != "--stdin" {
+				fmt.Println("Flag --stdin not found")
 				os.Exit(1)
 			}
 		}
@@ -249,6 +252,7 @@ func main() {
 				}
 				if isPick == true {
 					if len(os.Args) < 4 {
+						fmt.Println("incorrect input")
 						os.Exit(1)
 					}
 					flags["generate"](args[i+2])

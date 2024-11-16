@@ -66,11 +66,13 @@ func Issue(brand string, issuer string, useBrands bool, useIssuers bool, brandsF
 		// Чтение файла brandsFile построчно
 		scanner := bufio.NewScanner(brandsFileContent)
 		if err := scanner.Err(); err != nil {
+			fmt.Println("Reading file with error")
 			os.Exit(1)
 		}
 		// Чтение файла issuersFile построчно
 		scanner2 := bufio.NewScanner(issuersFileContent)
 		if err := scanner2.Err(); err != nil {
+			fmt.Println("Reading file with error")
 			os.Exit(1)
 		}
 
@@ -82,11 +84,26 @@ func Issue(brand string, issuer string, useBrands bool, useIssuers bool, brandsF
 
 		if strings.HasPrefix(iin, bin) {
 			// Генерация номера карты
-			fmt.Println(GenerateCardNumber(iin, 16))
+			if brand == "MASTERCARD" {
+				fmt.Println(GenerateCardNumber(iin, 16))
+			}
+			if brand == "VISA" {
+				i := randomInt(0, 2)
+				if i == 0 {
+					fmt.Println(GenerateCardNumber(iin, 13))
+				} else {
+					fmt.Println(GenerateCardNumber(iin, 16))
+				}
+			}
+			if brand == "AMEX" {
+				fmt.Println(GenerateCardNumber(iin, 15))
+			}
 		} else {
+			fmt.Println("Invalid input")
 			os.Exit(1)
 		}
 	} else {
+		fmt.Println("Flags --brands and --issuers not found")
 		os.Exit(1)
 	}
 }

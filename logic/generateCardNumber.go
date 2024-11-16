@@ -36,6 +36,7 @@ func GenerateCardNumber(prefix string, length int) string {
 			// Преобразуем символ в цифру
 			digit, err := strconv.Atoi(string(cardNumber[i]))
 			if err != nil {
+				fmt.Println("Symbol does not convert to number")
 				os.Exit(1)
 			}
 			digits = append(digits, digit)

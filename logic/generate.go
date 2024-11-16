@@ -25,10 +25,12 @@ func GenerateCards(value string, isPick bool) {
 			}
 		}
 		if countStar > 4 {
+			fmt.Println("The number of stars is more than four: ", countStar)
 			os.Exit(1)
 		}
 	}
 	if lastValueThisStar == false {
+		fmt.Println("Incorrect input")
 		os.Exit(1)
 	}
 	if lastValueThisStar == true {
@@ -53,6 +55,7 @@ func GenerateCards(value string, isPick bool) {
 				}
 				if len(validNumbers) == 0 {
 					os.Exit(1)
+					fmt.Println("Invalid numbers")
 				}
 
 				// Генерируем случайное число от 0 до 9
