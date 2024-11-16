@@ -7,15 +7,15 @@ import (
 	"strings"
 )
 
-func Information(brandsFile string, cardNumber string, useBrands bool, useIssuers bool, once bool) bool {
+func Information(emissioFile string, cardNumber string, useBrands bool, useIssuers bool, once bool) bool {
 	// Если используется флаг --brands или --issuers, обрабатываем их
-	if useBrands || useIssuers { // код который ниже как оказалось подходит логически и практически для обработки данных с обоих текстовых файлов, поэтому чтобы не дублировать код, создадим метод и будем прогонять два вида данных
+	if useBrands && useIssuers { // код который ниже как оказалось подходит логически и практически для обработки данных с обоих текстовых файлов, поэтому чтобы не дублировать код, создадим метод и будем прогонять два вида данных
 		// brand - полиморфизм, может быть brand или issuers в зависимости от того какой файл пришёл в параметры флага information
 		var hasBrand bool    // имеет ли карта бренд схожий с брендом в текстовом файле
 		var nameBrand string // имя бренда
 		var numBrand string  // номер бренда
 		// Читаем файл с брендами
-		brandsFileContent, err := os.Open(brandsFile)
+		brandsFileContent, err := os.Open(emissioFile)
 		if err != nil {
 			fmt.Println("information: file .txt not found")
 			os.Exit(1)
@@ -70,13 +70,15 @@ func Information(brandsFile string, cardNumber string, useBrands bool, useIssuer
 			fmt.Println("Correct: yes")
 			once = false
 		}
-
-		if useIssuers && brandsFile == "issuers.txt" {
-			fmt.Println("Card Issuer:", _nameIssuers)
-		}
-		if useBrands && brandsFile == "brands.txt" {
+		if emissioFile == "brands.txt" {
 			fmt.Println("Card Brand:", _nameBr)
 		}
+		if emissioFile == "issuers.txt" {
+			fmt.Println("Card Issuer:", _nameIssuers)
+		}
+	} else {
+		fmt.Println("flags --brands or --issuers not found")
+		os.Exit(1)
 	}
 	return once
 }

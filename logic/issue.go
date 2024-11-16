@@ -76,12 +76,10 @@ func Issue(brand string, issuer string, useBrands bool, useIssuers bool, brandsF
 
 		var iin string
 		var bin string
-		if useIssuers {
-			iin = ReturnIINorBIN(scanner2, issuer, useBrands, useIssuers, iin)
-		}
-		if useBrands {
-			bin = ReturnIINorBIN(scanner, brand, useBrands, useIssuers, iin)
-		}
+
+		iin = ReturnIINorBIN(scanner2, issuer, iin)
+		bin = ReturnIINorBIN(scanner, brand, iin)
+
 		if strings.HasPrefix(iin, bin) {
 			// Генерация номера карты
 			fmt.Println(GenerateCardNumber(iin, 16))

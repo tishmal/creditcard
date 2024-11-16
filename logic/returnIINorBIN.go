@@ -2,13 +2,14 @@ package logic
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strings"
 )
 
 // Функция для флага issue, чтобы не дублировать код, она возвращает идентификационный номер бренда или эмитента (IIN)
 // emissio это brand или issuer карты
-func ReturnIINorBIN(scanner *bufio.Scanner, emissio string, useBrands bool, useIssuers bool, iin string) string {
+func ReturnIINorBIN(scanner *bufio.Scanner, emissio string, iin string) string {
 	var name string  // имя бренда или эмитента
 	var num string   // номер бренда или эмитента
 	var count int    // счётчик, сколько имеется одинаковых брендов или эмитентов в текстовом файле
@@ -47,23 +48,20 @@ func ReturnIINorBIN(scanner *bufio.Scanner, emissio string, useBrands bool, useI
 			}
 		}
 
-		// Логика с учетом флагов useBrands и useIssuers
-		if useBrands && useIssuers {
-			if strings.HasPrefix(iin, num) == false && count > 1 {
-				// Мы уже прошли все строки, так что тут можно просто перебирать lines снова
-				for _, line := range lines {
-					for i, ch := range line {
-						if ch == ':' {
-							name = line[:i]
-							num = line[i+1:]
-						}
-					}
-					if strings.HasPrefix(iin, num) {
-						return num
+		if strings.HasPrefix(iin, num) == false && count > 1 {
+			// Мы уже прошли все строки, так что тут можно просто перебирать lines снова
+			for _, line := range lines {
+				for i, ch := range line {
+					if ch == ':' {
+						name = line[:i]
+						num = line[i+1:]
 					}
 				}
-				return num
+				if strings.HasPrefix(iin, num) {
+					return num
+				}
 			}
+			return num
 		}
 
 		// Основная логика поиска
@@ -71,7 +69,8 @@ func ReturnIINorBIN(scanner *bufio.Scanner, emissio string, useBrands bool, useI
 			return num
 		}
 	}
-
+	fmt.Println("Data not found")
+	os.Exit(1)
 	// Если ничего не найдено
 	return ""
 }

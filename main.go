@@ -1,13 +1,12 @@
 package main
 
-// s1
-
 import (
 	"bufio"
-	"creditcard/logic"
 	"fmt"
 	"os"
 	"strings"
+
+	"creditcard/logic"
 )
 
 func main() {
@@ -17,7 +16,7 @@ func main() {
 		os.Exit(1)
 	}
 	flags := make(map[string]func(string))
-	flags2 := make(map[string]func(string) func(string))
+	flags3 := make(map[string]func(string) func(string) func(string))
 	flags4 := make(map[string]func(string) func(string) func(string) func(string))
 
 	var useBrands bool            // Используется ли флаг --brands
@@ -59,32 +58,46 @@ func main() {
 		}
 	}
 
-	flags2["information"] = func(brandsFile string) func(cardNumber string) {
-		return func(cardNumber string) {
-			if logic.Information(brandsFile, cardNumber, useBrands, useIssuers, once) == false {
-				once = false
-			} else {
-				once = true
+	flags3["information"] = func(brandsFile string) func(issuersFile string) func(cardNumber string) {
+		return func(issuersFile string) func(cardNumber string) {
+			return func(cardNumber string) {
+				if logic.Validate(cardNumber) == false {
+					os.Exit(1)
+				}
+				infa := logic.Information(brandsFile, cardNumber, useBrands, useIssuers, once)
+				if infa == false {
+					once = false
+				} else {
+					once = true
+				}
+				infa2 := logic.Information(issuersFile, cardNumber, useBrands, useIssuers, once)
+				if infa2 == false {
+					once = true
+				} else {
+					once = true
+				}
 			}
 		}
 	}
 
 	flags["generate"] = func(value string) { // value - это значение(номер кредитной карты или нет) которое мы получаем из консоли
 		for i := 0; i < len(args); i++ {
-			if i > 2 {
+			if i > 3 && isPick {
+				fmt.Println("Unnecessary arguments")
+				os.Exit(1)
+			}
+			if i > 2 && !isPick {
+				fmt.Println("Unnecessary arguments")
 				os.Exit(1)
 			}
 		}
 		logic.GenerateCards(value, isPick)
 	}
 
-	var hasError bool
-
 	flags["validate"] = func(value string) {
 		if logic.Validate(value) == false {
 			fmt.Fprintf(os.Stderr, "INCORRECT\n")
 			os.Exit(1)
-			hasError = true
 		} else {
 			fmt.Fprintf(os.Stdout, "OK\n")
 		}
@@ -115,7 +128,8 @@ func main() {
 				}
 
 				once = true
-
+				var brandsFile string
+				var issuersFile string
 				for i := 1; i < len(args); i++ {
 					if args[i] == "information" {
 						// Перебираем флаги --brands и --issuers
@@ -123,10 +137,7 @@ func main() {
 							i++
 						}
 						if strings.HasPrefix(args[i+1], "--brands=") {
-							brandsFile := strings.TrimPrefix(args[i+1], "--brands=")
-							flags2["information"](brandsFile)(cardNumber)
-						} else if args[i+1] == "--brands" && i+1 < len(args) {
-							flags2["information"](args[i+1])(cardNumber)
+							brandsFile = strings.TrimPrefix(args[i+1], "--brands=")
 						}
 						if useBrands && strings.HasPrefix(args[i+1], "--brands=") {
 							i++
@@ -136,13 +147,11 @@ func main() {
 							i--
 						}
 						if strings.HasPrefix(args[i+1], "--issuers=") {
-							issuersFile := strings.TrimPrefix(args[i+1], "--issuers=")
-							flags2["information"](issuersFile)(cardNumber)
-						} else if args[i+1] == "--issuers" && i+1 < len(args) {
-							flags2["information"](args[i+1])(cardNumber)
+							issuersFile = strings.TrimPrefix(args[i+1], "--issuers=")
 						}
 					}
 				}
+				flags3["information"](brandsFile)(issuersFile)(cardNumber)
 			}
 		}
 		if err := scanner.Err(); err != nil {
@@ -154,32 +163,42 @@ func main() {
 			// Обработка флага "information"
 			if args[i] == "information" && i+1 < len(args) {
 				// Перебираем номера карт после флага "information"
-				for j := i + 1; j < len(args); j++ {
+				for j := i + 3; j < len(args); j++ {
 					cardNumber := args[j] // Номер карты берется из аргумента
 
 					if cardNumber == "--brands=brands.txt" || cardNumber == "--issuers=issuers.txt" {
 						continue
 					}
-					if logic.Validate(cardNumber) == false {
-						fmt.Println(cardNumber)
-						fmt.Println("Correct: no")
-						fmt.Println("Card Brand: -")
-						fmt.Println("Card Issuer: -")
-						continue // Если карта некорректна, то прекращаем дальнейшую обработку для этой карты
-					}
 					once = true
 					if useBrands || useIssuers {
+						var brandsFile string
+						var issuersFile string
 						// Если флаги активированы, передаем в функцию
 						for k := i + 1; k < len(args); k++ {
 							if strings.HasPrefix(args[k], "--brands=") {
-								brandsFile := strings.TrimPrefix(args[k], "--brands=")
-								flags2["information"](brandsFile)(cardNumber)
+								brandsFile = strings.TrimPrefix(args[k], "--brands=")
 							}
 							if strings.HasPrefix(args[k], "--issuers=") {
-								issuersFile := strings.TrimPrefix(args[k], "--issuers=")
-								flags2["information"](issuersFile)(cardNumber)
+								issuersFile = strings.TrimPrefix(args[k], "--issuers=")
 							}
 						}
+						brandsFileContent, err := os.Open(brandsFile)
+						issuersFileContent, err2 := os.Open(issuersFile)
+						if err != nil || err2 != nil {
+							fmt.Println("information: file .txt not found")
+							os.Exit(1)
+						}
+						defer brandsFileContent.Close()
+						defer issuersFileContent.Close()
+
+						if logic.Validate(cardNumber) == false {
+							fmt.Println(cardNumber)
+							fmt.Println("Correct: no")
+							fmt.Println("Card Brand: -")
+							fmt.Println("Card Issuer: -")
+							continue // Если карта некорректна, то прекращаем дальнейшую обработку для этой карты
+						}
+						flags3["information"](brandsFile)(issuersFile)(cardNumber)
 					}
 				}
 			}
@@ -187,6 +206,11 @@ func main() {
 	}
 
 	if stdinInput {
+		for i := 0; i < len(args); i++ {
+			if args[len(args)-1] != "--stdin" {
+				os.Exit(1)
+			}
+		}
 		// Если флаг --stdin активирован, читаем номера карт с stdin
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
@@ -194,6 +218,7 @@ func main() {
 			inputLine := scanner.Text()
 			if inputLine == "" {
 				fmt.Fprintf(os.Stderr, "INCORRECT\n")
+				os.Exit(1)
 			}
 
 			// Разбиваем строку на отдельные номера карт
@@ -206,7 +231,7 @@ func main() {
 		}
 		if err := scanner.Err(); err != nil {
 			fmt.Fprintf(os.Stderr, "INCORRECT\n")
-			hasError = true
+			os.Exit(1)
 		}
 	} else {
 		// Обработка аргументов командной строки и вызов флага
@@ -254,10 +279,5 @@ func main() {
 				flags4["issue"](brand)(issuer)(brandsFile)(issuersFile) // вызов флага
 			}
 		}
-	}
-	if hasError {
-		os.Exit(1)
-	} else {
-		os.Exit(0)
 	}
 }
