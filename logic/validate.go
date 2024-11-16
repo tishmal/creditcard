@@ -13,7 +13,7 @@ func Validate(numberCard string) bool {
 	if numberCard == "" {
 		return false
 	}
-	if len(numberCard) < 13 || len(numberCard) > 19 {
+	if len(numberCard) < 12 || len(numberCard) > 19 {
 		return false
 	}
 	for _, i := range numberCard {

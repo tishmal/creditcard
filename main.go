@@ -2,11 +2,10 @@ package main
 
 import (
 	"bufio"
+	"creditcard/logic"
 	"fmt"
 	"os"
 	"strings"
-
-	"creditcard/logic"
 )
 
 func main() {
