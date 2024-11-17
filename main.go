@@ -2,10 +2,11 @@ package main
 
 import (
 	"bufio"
-	"creditcard/logic"
 	"fmt"
 	"os"
 	"strings"
+
+	"creditcard/logic"
 )
 
 func main() {
@@ -282,9 +283,5 @@ func main() {
 				flags4["issue"](brand)(issuer)(brandsFile)(issuersFile) // вызов флага
 			}
 		}
-	}
-	if !isPick && !useBrands && !useIssuers {
-		fmt.Println("Invalid input")
-		os.Exit(1)
 	}
 }
