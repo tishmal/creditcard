@@ -283,4 +283,8 @@ func main() {
 			}
 		}
 	}
+	if !isPick && !useBrands && !useIssuers {
+		fmt.Println("Invalid input")
+		os.Exit(1)
+	}
 }
